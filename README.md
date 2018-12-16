@@ -1,4 +1,4 @@
-# Predicting The Housing Market Using a Neural Network
+# Predicting Housing Markets Using Neural Networks
 
 ## In this repository you will find four R scripts:
 
