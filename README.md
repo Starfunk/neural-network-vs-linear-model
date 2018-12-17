@@ -1,4 +1,4 @@
-# Predicting Housing Markets Using Neural Networks
+# When should you use a neural network over a linear model?
 
 ## In this repository you will find four R scripts:
 
