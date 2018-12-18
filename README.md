@@ -28,6 +28,8 @@ This script is essentially the same as Neural_Network_4.R except that two new va
 
 ## How to use this repository
 
+**It is suggested to not run the cross validation section for any of the scripts as the time it takes to complete one learning experience (especially for Neural_Network_Trig.R and Neural_Network_Cali.R can be quite long).**
+
 1. Run Functions.R. This script will download and load the neuralnet library and set up the relevant paths.
 
 2. If you would like to generate your own housing data, run Data_Generation.R
