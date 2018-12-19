@@ -1,5 +1,11 @@
 # Neural Networks vs. Linear Models - California Housing Dataset
 
+#1. SETTING UP THE NEURAL NETWORK
+#2. VISUALIZE RESULTS
+#3. CALCULATE CROSS VALIDATION VALUE
+
+#1. ----[SETTING UP THE NEURAL NETWORK]-----------------------------------------
+
 # Load in California housing market dataset
 housing.data.cali <- read.csv(paste(p.data, "cali-housing.csv", sep=""))
 
@@ -14,7 +20,6 @@ apply(housing.data.cali,2,function(x) sum(is.na(x)))
 # There are NA values in the 5th column, so we delete all the rows containing
 # NA values in the 5th column.
 housing.data.cali <- completeFun(housing.data.cali, c(5))
-
 
 # Setting up training and testing datasets. The training data make up 75% of
 # the dataset and are drawn randomly from the original dataset. The test data 
@@ -42,9 +47,11 @@ n <- names(train_)
 f <- as.formula(paste("median_house_value ~", 
                       paste(n[!n %in% "median_house_value"], collapse = " + ")))
 
+# Train the NN based on a set of parameters defined in Setup.R.
 nn <- neuralnet(f, data=train_, hidden=hidden.layers.cali, linear.output=T, 
                 threshold=threshold.cali)
 
+# Compute the NN's predicted values based on the testing data.
 pr.nn <- compute(nn, test_[,1:(ncol(train_)-1)])
 
 # Convert normalized predictions to actual value
@@ -78,16 +85,29 @@ prop.lm.cali <- propRMSE(pr.lm_, t, mean(housing.data.cali$median_house_value))
 # how well the neural network did compared to the linear mode.
 score.cali <- (RMSE.lm/RMSE.nn)
 
-#3. ----[VISUALIZE RESULTS]-----------------------------------------------------
+#2. ----[VISUALIZE RESULTS]-----------------------------------------------------
+
+# Plot both figures in the same frame.
+par(mfrow=c(2,1))
 
 # We plot using median income as the explanatory variable because both
 # values are correlated (and more so than other variables in the dataset).
 plot(test$median_income, test$median_house_value, pch=19, xlab="Median Income",
-     ylab="Median House Value")
+     ylab="Median House Value", main="Linear Model")
 points(test$median_income, pr.lm_, col="red", pch=19)
+
+plot(test$median_income, test$median_house_value, pch=19, xlab="Median Income",
+     ylab="Median House Value", main="Neural Network")
 points(test$median_income, as.vector(pr.nn_), col="blue", pch=19)
 
-#4. ----[CALCULATE THE CROSS VALIDATED VALUES]----------------------------------
+#3. ----[CALCULATE THE CROSS VALIDATED VALUES]----------------------------------
+
+# Run the cross validation algorithm to get the average RMSE values for the 
+# neural network and the linear model. Note that the training process for the 
+# neural network may converge on suboptimal weights, resulting in suboptimal 
+# predictions. We are only interested when the neural network converges on 
+# optimal weights, thus cross validation is not a great way to benchmark the 
+# neural network's performance. 
 
 # Returns the average RMSE values for the linear model and for 
 # the neural network by running k learning experiences. Note this takes a few 
@@ -100,4 +120,3 @@ print(paste("The average RMSE across", k.cali, "loops for the neural network is"
 
 print(paste("The average RMSE across", k.cali, "loops for the linear model is",
             CV[2], sep=" "))
-

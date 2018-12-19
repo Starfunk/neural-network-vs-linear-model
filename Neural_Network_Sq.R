@@ -35,11 +35,10 @@ sq.scaled <- as.data.frame(scale(sq.data, center = mins, scale = maxs - mins))
 sq.train <- sq.scaled[index,]
 sq.test <- sq.scaled[-index,]
 
-
 # Training the neural network (NN). See Setup.R for a description of the 
 # arguments used.
-net.sq <- neuralnet(Output~Input, sq.train, hidden=c(8,3), threshold=threshold.num, 
-                  stepmax= 1000000)
+net.sq <- neuralnet(Output~Input, sq.train, hidden=hidden.layers.num, 
+                    threshold=threshold.num, stepmax= 1000000)
 
 # Compute the predicted values for the neural network.
 pr.nn.sq <- compute(net.sq, sq.test[,1]) #Run them through the neural network
@@ -54,25 +53,39 @@ lm.fit <- glm(Output ~ Input, data=train)
 pr.lm <- predict(lm.fit, test)
 pr.lm_ <- as.vector(pr.lm)
 
-
+# Calculate the root mean square for the predictions.
 RMSE.lm <- rootMeanSqError(pr.lm_, as.vector(test$Output))
 RMSE.nn <- rootMeanSqError(as.vector(pr.nn.sq_), as.vector(test$Output))
 
+# Compute the proportional root mean square error which is normalized value
+# with respect to the mean output value of the original dataset. These
+# values allow us to compare to the performance of both the neural network and
+# linear model ACROSS datasets.
 prop.lm.sq <- propRMSE(pr.lm_, as.vector(test$Output), mean(sq.data$Output))
 prop.nn.sq <- propRMSE(as.vector(pr.nn.sq_), as.vector(test$Output),
                        mean(sq.data$Output))
 
+# Computes how many times RMSE.nn goes into RMSE.lm and is a score that shows
+# how well the neural network did compared to the linear mode.
 score.sq <- (RMSE.lm/RMSE.nn)
 
 #2. ----[VISUALIZE RESULTS]-----------------------------------------------------
 
 # Plot the neural network (red) against the linear model (blue) on top of the 
 # test data (black).
+
 plot(sq.data$Input,sq.data$Output, pch=19, xlab="Value", ylab="Value Squared")
 points(test$Input, pr.lm_, col="red", pch=19)
 points(test$Input, pr.nn.sq_, col="blue", pch=19)
 
 #3. ----[CALCULATE CROSS VALIDATION VALUE]------------------------------------------
+
+# Run the cross validation algorithm to get the average RMSE values for the 
+# neural network and the linear model. Note that the training process for the 
+# neural network may converge on suboptimal weights, resulting in suboptimal 
+# predictions. We are only interested when the neural network converges on 
+# optimal weights, thus cross validation is not a great way to benchmark the 
+# neural network's performance. 
 
 # Returns the average RMSE values for the linear model and for 
 # the neural network by running k learning experiences. Note this takes a few 

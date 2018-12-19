@@ -1,22 +1,10 @@
 # Neural Networks vs. Linear Models - Simulated Housing Dataset
 
-#1. CHOOSE A DATASET TO USE
-#2. SETTING UP THE NEURAL NETWORK
-#3. VISUALIZE RESULTS
-#4. CALCULATE CROSS VALIDATION VALUE
+#1. SETTING UP THE NEURAL NETWORK
+#2. VISUALIZE RESULTS
+#3. CALCULATE CROSS VALIDATION VALUE
 
-#1. ----[CHOOSE A DATASET TO USE]-----------------------------------------------
-
-#A. SAVED DATASET
-# Load housing.data from the DATA folder.
-housing.data <- read.csv(paste(p.data, 
-                               "simulated-housing.csv", sep=""))
-
-#B. CUSTOM DATASET
-# Use a custom housing.data dataset by first running the Data.Generation.R
-# script.
-
-#2. ----[SETTING UP THE NEURAL NETWORK]-----------------------------------------
+#1. ----[SETTING UP THE NEURAL NETWORK]-----------------------------------------
 
 # Setting up training and testing datasets. The training data make up 75% of
 # the dataset and are drawn randomly from the original dataset. The training
@@ -85,7 +73,7 @@ prop.nn.sim <- propRMSE(as.vector(pr.nn_), as.vector(test$value),
 # how well the neural network did compared to the linear mode.
 (score.sim <- RMSE.lm / RMSE.nn)
 
-#3. ----[VISUALIZE RESULTS]-----------------------------------------------------
+#2. ----[VISUALIZE RESULTS]-----------------------------------------------------
 
 # Plot both figures in the same frame.
 par(mfrow=c(2,1))
@@ -101,9 +89,16 @@ points(test$prestige, pr.lm_, col="red", pch=19)
 # Plot the neural network (blue) against the test data (black).
 plot(test$prestige, test$value, pch=19, ylab="Housing Values", xlab="Prestige", 
      main="Neural Network")
-points(test$prestige, as.vector(pr.nn.sq_), col="blue", pch=19)
+points(test$prestige, as.vector(pr.nn_), col="blue", pch=19)
 
-#4. ----[CALCULATE CROSS VALIDATION VALUE]--------------------------------------
+#3. ----[CALCULATE CROSS VALIDATION VALUE]--------------------------------------
+
+# Run the cross validation algorithm to get the average RMSE values for the 
+# neural network and the linear model. Note that the training process for the 
+# neural network may converge on suboptimal weights, resulting in suboptimal 
+# predictions. We are only interested when the neural network converges on 
+# optimal weights, thus cross validation is not a great way to benchmark the 
+# neural network's performance. 
 
 # Returns the average RMSE values for the linear model and for 
 # the neural network by running k learning experiences. Note this takes a few 

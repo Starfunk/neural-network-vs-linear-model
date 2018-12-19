@@ -1,6 +1,10 @@
 # Neural Networks vs. Linear Models - Results
 
-# Create a dataframe that stores the LM vs. NN scores.
+# This script displays the performance of the neural network and the linear 
+# model across datasets.
+
+# Create a dataframe that stores the LM vs. NN scores. I.e. How many times
+# does the neural network error go into the linear model error?
 (scores <- data.frame(
   squared = score.sq,
   trig = score.trig,

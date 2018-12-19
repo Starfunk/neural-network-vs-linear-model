@@ -69,6 +69,18 @@ hist(block)
 (housing.values <- calcHousingValues(age, criminal, prestige, amenities, 
                                      smell, block))
 
+# CREATE HOUSING.DATA
+# Save the housing data variables in the dataframe, housing.data.
+(housing.data <- data.frame(
+  age = age,
+  criminal = criminal,
+  prestige = prestige,
+  amenities = amenities,
+  smell = smell,
+  block = block,
+  value = housing.values
+))
+
 # Visualize the spread of housing values.
 hist(housing.values)
 
@@ -87,20 +99,8 @@ plot(housing.data$smell, housing.data$value, xlab="smell", ylab="value")
 # Plot the distribution of housing values against block.
 plot(housing.data$block, housing.data$value, xlab="block", ylab="value")
 
-#3. ----[PREPARE HOUSING DATA]--------------------------------------------------
 
-# Save the housing data variables in the dataframe, housing.data.
-(housing.data <- data.frame(
-  age = age,
-  criminal = criminal,
-  prestige = prestige,
-  amenities = amenities,
-  smell = smell,
-  block = block,
-  value = housing.values
-))
-
-#4. ----[OUTLIER DATA]----------------------------------------------------------
+#3. ----[OUTLIER DATA]----------------------------------------------------------
 
 # In order to test if the outlier data points affect the neural networks 
 # prediction accuracy, the following section copies housing.data where the 
@@ -136,7 +136,7 @@ for(i in 1:nrow(outliers)) {
                                      outliers[i,5], outliers[i,6])
 }
 
-#5. ----[SAVING HOUSING DATA]---------------------------------------------------
+#4. ----[SAVING HOUSING DATA]---------------------------------------------------
 
 # If you wish to overwrite the saved housing.data that came with the repository 
 # and use your own custom housing data, you can save the data by running the 

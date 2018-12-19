@@ -4,7 +4,6 @@
 #2. VISUALIZE RESULTS
 #3. CALCULATE CROSS VALIDATION VALUE
 
-
 #1. ----[SETTING UP THE NEURAL NETWORK]-----------------------------------------
 
 # Create input data. Save it in a dataframe.
@@ -17,7 +16,6 @@ Output <- trigFunc(Input)
 # Combine input and output data into one dataframe.
 trig.data <- cbind(trig.data, Output)
 colnames(trig.data) <- c("Input","Output")
-
 
 # Setting up training and testing datasets. The training data make up 75% of
 # the dataset and are drawn randomly from the original dataset. The test data 
@@ -52,6 +50,7 @@ pr.nn.sq <- compute(net.sq, trig.test[,1])
 pr.nn.sq_ <- pr.nn.sq$net.result * (max(trig.data$Output) - 
                                       min(trig.data$Output)) + min(trig.data$Output)
 
+plot(net.sq)
 # Train the linear model on the training data and then test it on the testing
 # data. Note that we don't use the scaled datasets here since it is not
 # necessary to train the linear model on normalized values.
@@ -84,6 +83,13 @@ points(test$Input, pr.nn.sq_, col="blue", pch=19)
 points(test$Input, pr.lm_, col="red", pch=19)
 
 #3. ----[CALCULATE THE CROSS VALIDATED VALUES]----------------------------------
+
+# Run the cross validation algorithm to get the average RMSE values for the 
+# neural network and the linear model. Note that the training process for the 
+# neural network may converge on suboptimal weights, resulting in suboptimal 
+# predictions. We are only interested when the neural network converges on 
+# optimal weights, thus cross validation is not a great way to benchmark the 
+# neural network's performance. 
 
 # Returns the average RMSE values for the linear model and for 
 # the neural network by running k learning experiences. Note this takes a few 

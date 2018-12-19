@@ -2,11 +2,9 @@
 # 
 # Set up dependencies, workspace, and relevant functions.
 
-
 #1. INSTALL DEPENDENCIES
 #2. ORGANIZING WORKSPACE
 #3. SPECIFY PARAMETERS
-
 
 #1. ----[INSTALL DEPENDENCIES]--------------------------------------------------
 
@@ -16,6 +14,7 @@ library(neuralnet)
 #2. -----[ORGANIZING WORKSPACE]-------------------------------------------------
 
 # NOTE: MAKE SURE THAT YOU'VE SAVED THIS REPOSITORY TO YOUR WORKING DIRECTORY.
+# NOTE: MAKE SURE THAT YOUR WORKING DIRECTORY IS IN FINAL PROJECT.
 
 # Creating new folder names in working directory to store data.
 folder.data <- c("Data") # names of folders to be created
@@ -25,7 +24,6 @@ if(file.exists(folder.data) == FALSE)
 
 # Storing data path to data file
 p.data <- paste(getwd(), "/Data/", sep = "")
-
 
 #3. ----[CUSTOM FUNCTIONS]------------------------------------------------------
 
@@ -82,54 +80,41 @@ trigFunc <- function(x) {
   return(trig.val)
 }
 
-# Calculate the k-fold cross validation values for the linear model and the 
-# neural network for the 
+# Calculate the k-fold cross validation values for the squared and trig
+# scripts. The code here is not heavily commented because this same code can be
+# found in both the squared and trig scripts.
 kFoldValidationNum <- function(sq.data, k) {
   RMSE.nn <- c()
   RMSE.lm <- c()
   for(i in 1:k) {
-    print(i)
-    
     (index <- sample(1:nrow(sq.data),round(0.75*nrow(sq.data))))
     train <- sq.data[index,]
     test <- sq.data[-index,]
-    
     maxs <- apply(sq.data, 2, max) 
     mins <- apply(sq.data, 2, min)
-    #Column bind the data into one variable
-    
-    
-    sq.scaled <- as.data.frame(scale(sq.data, center = mins, scale = maxs - mins))
+    sq.scaled <- as.data.frame(scale(sq.data, center = mins,
+                                     scale = maxs - mins))
     sq.train <- sq.scaled[index,]
     sq.test <- sq.scaled[-index,]
-    
-    
-    #Train the neural network
-    #Going to have 10 hidden layers
-    #Threshold is a numeric value specifying the threshold for the partial
-    #derivatives of the error function as stopping criteria.
     nn.sq <- neuralnet(Output~Input, sq.train, hidden=c(8,3), 
                        threshold=threshold.num, stepmax= 1000000)
-    
-    pr.nn.sq <- compute(nn.sq, sq.test[,1]) #Run them through the neural network
-    
+    pr.nn.sq <- compute(nn.sq, sq.test[,1]) 
     pr.nn.sq_ <- pr.nn.sq$net.result * (max(sq.data$Output) - 
-                                          min(sq.data$Output)) + min(sq.data$Output)
-    
+                                  min(sq.data$Output)) + min(sq.data$Output)
     lm.fit <- glm(Output ~ Input, data=train)
     pr.lm <- predict(lm.fit, test)
     pr.lm_ <- as.vector(pr.lm)
-    
-    
     RMSE.nn <- c(RMSE.nn, rootMeanSqError(pr.lm_, as.vector(test$Output)))
-    RMSE.lm <- c(RMSE.lm, rootMeanSqError(as.vector(pr.nn.sq_), as.vector(test$Output)))
-    
-    
+    RMSE.lm <- c(RMSE.lm, rootMeanSqError(as.vector(pr.nn.sq_), 
+                                          as.vector(test$Output)))
   }
   kMSE <- c(mean(RMSE.nn), mean(RMSE.lm))
   return(kMSE)
 }
 
+# Calculate the k-fold cross validation values for the sim
+# script. The code here is not heavily commented because this same code can be
+# found in the sim script.
 kFoldValidationSim <- function(data, outliers, k) {
   RMSE.nn <- c()
   RMSE.lm <- c()
@@ -142,33 +127,28 @@ kFoldValidationSim <- function(data, outliers, k) {
     scaled <- as.data.frame(scale(data, center = mins, scale = maxs - mins))
     train_ <- scaled[index,]
     test_ <- scaled[-index,]
-    
     n <- names(train_)
-    f <- as.formula(paste("value ~", paste(n[!n %in% "value"], collapse = " + ")))
+    f <- as.formula(paste("value ~", paste(n[!n %in% "value"], 
+                                           collapse = " + ")))
     nn <- neuralnet(f, data=train_, hidden=hidden.layers.sim, 
                     threshold=threshold.sim, linear.output=T)
-    
-    # Returns normalized predictions
     pr.nn <- compute(nn, test_[,1:(ncol(data)-1)])
-    
-    # Convert normalized predictions to actual value
     pr.nn_ <- as.vector(pr.nn$net.result * (max(housing.data$value) -
                              min(housing.data$value)) + min(housing.data$value))
-    
     lm.fit <- glm(value~., data=train)
     pr.lm <- predict(lm.fit, test)
     pr.lm_ <- as.vector(pr.lm)
     t <- as.vector(test$value)
-    
     RMSE.nn <- c(RMSE.nn,  meanSqError(pr.nn_, t))
     RMSE.lm <- c(RMSE.lm, meanSqError(pr.lm_, t))
-    
   }
   kMSE <- c(mean(RMSE.nn), mean(RMSE.lm))
   return(kMSE)
 }
 
-
+# Calculate the k-fold cross validation values for the cali
+# script. The code here is not heavily commented because this same code can be
+# found in the cali script.
 kFoldValidationCali <- function(data, outliers, k) {
   RMSE.nn <- c()
   RMSE.lm <- c()
@@ -181,42 +161,33 @@ kFoldValidationCali <- function(data, outliers, k) {
     scaled <- as.data.frame(scale(data, center = mins, scale = maxs - mins))
     train_ <- scaled[index,]
     test_ <- scaled[-index,]
-    
     n <- names(train_)
-    f <- as.formula(paste("value ~", paste(n[!n %in% "value"], collapse = " + ")))
+    f <- as.formula(paste("value ~", paste(n[!n %in% "value"], 
+                                           collapse = " + ")))
     nn <- neuralnet(Output~Input, sq.train, hidden=hidden.layers.cali, 
                     threshold=threshold.cali, stepmax= 1000000)
-    
-    # Returns normalized predictions
     pr.nn <- compute(nn, test_[,1:(ncol(data)-1)])
-    
-    # Convert normalized predictions to actual value
     pr.nn_ <- pr.nn$net.result * (max(housing.data$value) -
-                                    min(housing.data$value)) + min(housing.data$value)
-    
+                            min(housing.data$value)) + min(housing.data$value)
     lm.fit <- glm(value~., data=train)
     pr.lm <- predict(lm.fit, test)
     pr.lm_ <- as.vector(pr.lm)
-    
-    print(i)
-    print(meanSqError(as.vector(pr.nn_), as.vector(test$value)))
-    print(meanSqError(pr.lm_, as.vector(test$value)))
-    
-    RMSE.nn <- c(RMSE.nn,  meanSqError(as.vector(pr.nn_), as.vector(test$value)))
+    RMSE.nn <- c(RMSE.nn,  meanSqError(as.vector(pr.nn_), 
+                                       as.vector(test$value)))
     RMSE.lm <- c(RMSE.lm, meanSqError(pr.lm_, as.vector(test$value)))
-    
-   
   }
   kMSE <- c(mean(RMSE.nn),mean(RMSE.lm))
   return(kMSE)
 }
 
+# Deletes all rows in data containing NA values in desiredCols.
 completeFun <- function(data, desiredCols) {
   completeVec <- complete.cases(data[, desiredCols])
   return(data[completeVec, ])
 }
 
 #4. ----[SPECIFY PARAMETERS]----------------------------------------------------
+
 # Specifying the weight of the following variables (the higher the weight, the
 # more the housing value will be biased towards that variable).
 
